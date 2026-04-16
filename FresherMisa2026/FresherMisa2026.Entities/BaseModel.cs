@@ -4,6 +4,9 @@ using System.Text;
 
 namespace FresherMisa2026.Entities
 {
+    /// <summary>
+    /// Dán nhãn IRequired lên Property 
+    /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
     public class IRequired : Attribute
     {

@@ -129,7 +129,8 @@ namespace FresherMisa2026.Application.Services
 
             foreach (var property in properties)
             {
-                //1.1 Kiểm tra xem có attribute cần phải validate không
+                // 1.1 Kiểm tra xem có attribute cần phải validate không
+                // Property này có được dán nhãn [IRequired] không, có thì chạy 
                 if (property.IsDefined(typeof(IRequired), false))
                 {
                     var error = ValidateRequired(entity, property);

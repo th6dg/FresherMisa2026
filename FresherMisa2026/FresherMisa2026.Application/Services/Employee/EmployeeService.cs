@@ -48,9 +48,46 @@ namespace FresherMisa2026.Application.Services
                 errors.Add(new ValidationError("EmployeeCode", "Mã nhân viên không được vượt quá 20 ký tự"));
             }
 
-            if (string.IsNullOrEmpty(employee.EmployeeName))
+            //if (string.IsNullOrEmpty(employee.EmployeeName))
+            //{
+            //    errors.Add(new ValidationError("EmployeeName", "Tên nhân viên không được để trống"));
+            //}
+
+            // Mã nhân viên không được trùng lặp
+            var existEmployee = _employeeRepository.GetEmployeeByCode(employee.EmployeeCode).GetAwaiter().GetResult();
+            if (existEmployee != null)
             {
-                errors.Add(new ValidationError("EmployeeName", "Tên nhân viên không được để trống"));
+                errors.Add(new ValidationError("EmployeeCode", "Mã nhân viên đã tồn tại"));
+            }
+
+            // Email phải đúng định dạng (nếu có)
+            if (employee.Email != null)
+            {
+                bool IsValidEmail = Employee.IsValidEmail(employee.Email);
+                if (!IsValidEmail)
+                {
+                    errors.Add(new ValidationError("EmployeeEmail", "Email không đúng định dạng"));
+                }
+            }
+
+            // Số điện thoại phải đúng định dạng (nếu có)
+            if (employee.PhoneNumber != null)
+            {
+                bool IsValidPhoneNumber = Employee.IsValidPhoneNumber(employee.PhoneNumber);
+                if (!IsValidPhoneNumber)
+                {
+                    errors.Add(new ValidationError("EmployeePhoneNumber", "Số điện thoại không hợp lệ"));
+                }
+            }
+
+            // Ngày sinh phải nhỏ hơn ngày hiện tại
+            if (employee.DateOfBirth != null)
+            {
+                bool IsValidDate = Employee.IsValidDateOfBirth(employee.DateOfBirth);
+                if (!IsValidDate)
+                {
+                    errors.Add(new ValidationError("EmployeeDate", "Ngày sinh không hợp lệ"));
+                }
             }
 
             return errors;
