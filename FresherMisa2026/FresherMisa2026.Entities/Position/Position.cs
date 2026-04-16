@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace FresherMisa2026.Entities.Position
 {
-    [ConfigTable("Position", false, "PositionCode")]
+    [ConfigTable("Position", true, "PositionCode")]
     public class Position : BaseModel
     {
         [Key]

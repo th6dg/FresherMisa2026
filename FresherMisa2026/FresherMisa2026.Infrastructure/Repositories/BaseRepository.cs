@@ -138,7 +138,7 @@ namespace FresherMisa2026.Infrastructure.Repositories
             if (_modelType.GetHasDeletedColumn())
             {
                 AppendWhere(query);
-                query.Append("IsDeleted = FALSE");
+                query.Append(" AND IsDeleted = FALSE");
                 whereCount++;
             }
 
