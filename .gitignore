@@ -79,3 +79,7 @@ secrets.json
 
 # Entity Framework migrations snapshot (optional)
 *Migrations/*Designer.cs
+
+# PhamTheDuong ignore
+FresherMisa2026/FresherMisa2026 (1)/
+FresherMisa2026/FresherMisa2026.WebAPI/Items/
