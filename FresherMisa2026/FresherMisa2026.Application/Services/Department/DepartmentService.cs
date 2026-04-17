@@ -3,6 +3,7 @@ using FresherMisa2026.Application.Interfaces.Repositories;
 using FresherMisa2026.Application.Interfaces.Services;
 using FresherMisa2026.Entities;
 using FresherMisa2026.Entities.Department;
+using FresherMisa2026.Entities.Employee;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -60,5 +61,18 @@ namespace FresherMisa2026.Application.Services
             return errors;
         }
         #endregion OVERRIDE METHODS
+
+        #region feat-2.3
+        public async Task<IEnumerable<Employee>> GetEmployeeByDepartmentCode(string DepartmentCode)
+        {
+            return await _deptRepository.GetEmployeeByDepartmentCode(DepartmentCode);
+        }
+
+        public async Task<int> GetNumberOfEmployeeInDepartment(Guid DepartmentID)
+        {
+            return await _deptRepository.GetNumberOfEmployeeInDepartment(DepartmentID);
+        }
+
+        #endregion feat-2.3
     }
 }

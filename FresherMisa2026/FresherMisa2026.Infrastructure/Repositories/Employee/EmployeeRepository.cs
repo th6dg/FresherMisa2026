@@ -3,6 +3,7 @@ using FresherMisa2026.Application.Extensions;
 using FresherMisa2026.Application.Interfaces.Repositories;
 using FresherMisa2026.Entities.Employee;
 using FresherMisa2026.Entities.Employee.DTO;
+using FresherMisa2026.Infrastructure.Repositories.Config;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Text;
@@ -11,10 +12,6 @@ namespace FresherMisa2026.Infrastructure.Repositories
 {
     public class EmployeeRepository : BaseRepository<Employee>, IEmployeeRepository
     {
-        private string FIELD_SEARCH = "e.*";
-        private string EMPLOYEE_TABLE_NAME = "employee";
-        private string DEPARTMENT_TABLE_NAME = "department";
-        private string POSITION_TABLE_NAME = "position";
         public EmployeeRepository(IConfiguration configuration) : base(configuration)
         {
         }
@@ -55,21 +52,21 @@ namespace FresherMisa2026.Infrastructure.Repositories
             var JoinClause = new StringBuilder();
             var WhereClase = new StringBuilder(" WHERE e.IsDeleted = 0 ");
             var param = new DynamicParameters();
-            SqlBuilder.Append("select ").Append(FIELD_SEARCH).Append(" from " + EMPLOYEE_TABLE_NAME + " e ");
+            SqlBuilder.Append("select ").Append(QueryConfig.EMPLOYEE_FIELD_SEARCH).Append(" from " + QueryConfig.EMPLOYEE_TABLE_NAME + " e ");
             foreach (var (key, value) in listField)
             {
                 param.Add(key, value);
                 // Join Table
                 if (key == "DepartmentID")
                 {
-                    JoinClause.Append(" join " + DEPARTMENT_TABLE_NAME + " d on e.DepartmentID = d.DepartmentID ");
+                    JoinClause.Append(" join " + QueryConfig.DEPARTMENT_TABLE_NAME + " d on e.DepartmentID = d.DepartmentID ");
                     WhereClase.Append(" AND e." + key + "=@" + key);
                     continue;
                 }
 
                 if (key == "PositionID")
                 {
-                    JoinClause.Append(" join " + POSITION_TABLE_NAME + " p on e.PositionID = p.PositionID ");
+                    JoinClause.Append(" join " + QueryConfig.POSITION_TABLE_NAME + " p on e.PositionID = p.PositionID ");
                     WhereClase.Append(" AND e." + key + "=@" + key);
                     continue;
                 }

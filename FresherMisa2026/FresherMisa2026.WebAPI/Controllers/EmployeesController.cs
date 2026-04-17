@@ -63,5 +63,6 @@ namespace FresherMisa2026.WebAPI.Controllers
             response.Data = await _employeeService.GetBySomeCondition(filterRequest); ;   
             return Ok(response);
         }
+
     }
 }
