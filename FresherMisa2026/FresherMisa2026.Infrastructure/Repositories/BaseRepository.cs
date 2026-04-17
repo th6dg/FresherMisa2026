@@ -34,7 +34,7 @@ namespace FresherMisa2026.Infrastructure.Repositories
         {
             _configuration = configuration;
             _connectionString = _configuration.GetConnectionString("DefaultConnection")!;
-            _dbConnection = new MySqlConnection(_connectionString);
+            _dbConnection = new MySqlConnector.MySqlConnection(_connectionString);
             _modelType = typeof(TEntity);
             _tableName = _modelType.GetTableName();
         }

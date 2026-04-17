@@ -1,6 +1,7 @@
 using FresherMisa2026.Application.Interfaces;
 using FresherMisa2026.Application.Interfaces.Repositories;
 using FresherMisa2026.Infrastructure.Repositories;
+using FresherMisa2026.Infrastructure.utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -14,6 +15,7 @@ namespace FresherMisa2026.Infrastructure
         public static IServiceCollection AddInfrastructure(
             this IServiceCollection services)
         {
+            Dapper.SqlMapper.AddTypeHandler(new GuidTypeHandler());
             //base
             services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 

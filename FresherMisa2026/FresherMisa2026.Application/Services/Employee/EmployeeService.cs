@@ -3,6 +3,7 @@ using FresherMisa2026.Application.Interfaces.Repositories;
 using FresherMisa2026.Application.Interfaces.Services;
 using FresherMisa2026.Entities;
 using FresherMisa2026.Entities.Employee;
+using FresherMisa2026.Entities.Employee.DTO;
 using System;
 using System.Collections.Generic;
 
@@ -91,6 +92,105 @@ namespace FresherMisa2026.Application.Services
             }
 
             return errors;
+        }
+
+        public async Task<IEnumerable<Employee>> GetBySomeCondition(EmployeeFilterRequest employeeFilterRequest)
+        {
+            var validField = GetValidField(employeeFilterRequest);
+            return await _employeeRepository.GetEmployeesByFilter(validField);
+        }
+
+        /// <summary>
+        /// Lọc ra các trường khác null và thoả mãn filter 
+        /// </summary>
+        /// <param name="filterRequest"></param>
+        /// <returns></returns>
+        protected Dictionary<string, object> GetValidField(EmployeeFilterRequest filterRequest)
+        {
+            var errors = new List<ValidationError>();
+            var validField = new Dictionary<string, object>();
+            EmployeeFilterRequest.TrimAllStringField(filterRequest);
+
+            // Department
+            if (!string.IsNullOrEmpty(filterRequest.DepartmentID)) 
+            {
+                if (!Employee.IsValidGuid((filterRequest.DepartmentID)))
+                {
+                    errors.Add(new ValidationError("Department", "Mã Department lỗi"));
+                }
+                else
+                {
+                    validField.Add("DepartmentID", filterRequest.DepartmentID);
+                }
+                
+            }
+
+            // Position
+            if (!string.IsNullOrEmpty(filterRequest.PositionID))
+            {
+                if (!Employee.IsValidGuid((filterRequest.PositionID)))
+                {
+                    errors.Add(new ValidationError("Position", "Mã Position lỗi"));
+                }
+                else
+                {
+                    validField.Add("PositionID", filterRequest.PositionID);
+                }
+            }
+
+            // Gender
+            if (filterRequest.Gender != null) 
+            {
+                var validGenders = new List<int?> { 0, 1, 2 };
+                if (!validGenders.Contains(filterRequest.Gender))
+                {
+                    errors.Add(new ValidationError("Gender", "Gender lỗi"));
+                }
+                else
+                {
+                    validField.Add("Gender", filterRequest.Gender);
+                }
+            }
+
+            // Salary
+            if ((filterRequest.SalaryFrom == null) == (filterRequest.SalaryTo == null))
+            {
+                if (filterRequest.SalaryFrom != null)
+                {
+                    if (EmployeeFilterRequest.IsValidSalary(filterRequest))
+                    {
+                        validField.Add("SalaryFrom", filterRequest.SalaryFrom);
+                        validField.Add("SalaryTo", filterRequest.SalaryTo);
+                    }
+                }
+            }
+            if (!((filterRequest.SalaryFrom == null) == (filterRequest.SalaryTo == null)))
+            {
+                errors.Add(new ValidationError("Salary", "Salary lỗi"));
+            }
+
+            // Hire Date
+            if ((filterRequest.HireDateFrom == null) == (filterRequest.HireDateTo == null))
+            {
+                if (filterRequest.HireDateFrom != null)
+                {
+                    if (EmployeeFilterRequest.IsValidHireDate(filterRequest))
+                    {
+                        validField.Add("HireDateFrom", filterRequest.HireDateFrom);
+                        validField.Add("HireDateTo", filterRequest.HireDateTo);
+                    }
+                }
+            }
+            if (!((filterRequest.HireDateFrom == null) == (filterRequest.HireDateTo == null)))
+            {
+                errors.Add(new ValidationError("Hire Date", "Hire Date lỗi"));
+            }
+            
+            if (errors.Any())
+            {
+                throw new ValidateException(errors);
+            }
+            return validField;
         }
     }
 }

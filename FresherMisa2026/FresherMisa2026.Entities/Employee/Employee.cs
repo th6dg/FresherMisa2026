@@ -9,7 +9,7 @@ namespace FresherMisa2026.Entities.Employee
     public class Employee : BaseModel
     {
         [Key]
-        public Guid EmployeeID { get; set; }
+        public Guid? EmployeeID { get; set; }
 
         [IRequired]
         public string EmployeeCode { get; set; }
@@ -28,10 +28,10 @@ namespace FresherMisa2026.Entities.Employee
         public string? Address { get; set; }
 
         [IRequired]
-        public Guid DepartmentID { get; set; }
+        public Guid? DepartmentID { get; set; }
 
         [IRequired]
-        public Guid PositionID { get; set; }
+        public Guid? PositionID { get; set; }
 
         public decimal? Salary { get; set; }
 
@@ -66,6 +66,11 @@ namespace FresherMisa2026.Entities.Employee
                   return false;
             }
             return true;
+        }
+
+        public static bool IsValidGuid(string i) 
+        { 
+            return Guid.TryParse(i, out Guid result) && result != Guid.Empty;
         }
     }
 }

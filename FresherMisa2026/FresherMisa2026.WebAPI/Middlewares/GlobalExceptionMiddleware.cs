@@ -1,4 +1,5 @@
-﻿using FresherMisa2026.Entities;
+﻿using FresherMisa2026.Application;
+using FresherMisa2026.Entities;
 using System.Net;
 using System.Text.Json;
 
@@ -31,23 +32,30 @@ namespace FresherMisa2026.WebAPI.Middlewares
 
         private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            // Set status code and content type
             context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            var statusCode = (int)HttpStatusCode.InternalServerError;
+            var userMessage = "Có lỗi xảy ra vui lòng liên hệ MISA!";
+            object? data = null;
 
-            // Create response payload
+            if (exception is ValidateException validateEx)
+            {
+                statusCode = (int)HttpStatusCode.BadRequest;
+                userMessage = "Dữ liệu không hợp lệ!";
+                data = validateEx.Errors; // Danh sách cộng dồn lỗi của bạn đây
+            }
+
+            context.Response.StatusCode = statusCode;
+
             var response = new ServiceResponse
             {
                 IsSuccess = false,
-                Code = context.Response.StatusCode,
-                UserMessage = "Có lỗi xảy ra vui lòng liên hệ Misa!",
-                DevMessage = exception.Message // Optional: include for dev
+                Code = statusCode,
+                UserMessage = userMessage,
+                DevMessage = exception.Message,
+                Data = data
             };
 
-            // Serialize the response to JSON
-            var jsonResponse = JsonSerializer.Serialize(response);
-
-            return context.Response.WriteAsync(jsonResponse);
+            return context.Response.WriteAsJsonAsync(response);
         }
     }
 }
