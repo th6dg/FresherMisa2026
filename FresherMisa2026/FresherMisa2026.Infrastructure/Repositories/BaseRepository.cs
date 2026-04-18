@@ -34,7 +34,10 @@ namespace FresherMisa2026.Infrastructure.Repositories
         {
             _configuration = configuration;
             _connectionString = _configuration.GetConnectionString("DefaultConnection")!;
-            _dbConnection = new MySqlConnector.MySqlConnection(_connectionString);
+            // Tạo connection mỗi khi khởi tạo 
+            // Một request có thể giữ connnection quá lâu, chiếm dụng tài nguyên 
+            // Tạo pattern Create - Use - Dispose 
+            // _dbConnection = new MySqlConnector.MySqlConnection(_connectionString);
             _modelType = typeof(TEntity);
             _tableName = _modelType.GetTableName();
         }
@@ -89,18 +92,27 @@ namespace FresherMisa2026.Infrastructure.Repositories
         /// CREATED BY: DVHAI (11/07/2021)
         private async Task<IEnumerable<TEntity>> GetEntitiesUsingCommandTextAsync()
         {
-            var query = new StringBuilder($"select * from {_tableName}");
-            int whereCount = 0;
-
-            if (_modelType.GetHasDeletedColumn())
+            try
             {
-                whereCount++;
-                query.Append($" where IsDeleted = FALSE");
+                await OpenConnectionAsync();
+
+                var query = new StringBuilder($"select * from {_tableName}");
+                int whereCount = 0;
+
+                if (_modelType.GetHasDeletedColumn())
+                {
+                    whereCount++;
+                    query.Append($" where IsDeleted = FALSE");
+                }
+
+                var entities = await _dbConnection.QueryAsync<TEntity>(query.ToString(), commandType: CommandType.Text);
+                return entities.ToList();
             }
-
-            var entities = await _dbConnection.QueryAsync<TEntity>(query.ToString(), commandType: CommandType.Text);
-
-            return entities.ToList();
+            // finally vẫn chạy sau từ khóa return 
+            finally
+            {
+                Dispose();
+            }
         }
 
         /// <summary>
@@ -121,30 +133,39 @@ namespace FresherMisa2026.Infrastructure.Repositories
         /// <returns></returns>
         private async Task<TEntity> GetEntitieByIdUsingCommandTextAsync(string id)
         {
-            var query = new StringBuilder($"select * from {_tableName}");
-            int whereCount = 0;
-
-            Func<StringBuilder, bool> AppendWhere = (query) => { if (whereCount == 0) query.Append(" where "); return true; };
-
-            var primaryKey = _modelType.GetKeyName();
-
-            if (primaryKey != null)
+            try
             {
-                AppendWhere(query);
-                query.Append($"{primaryKey} = @Id");
-                whereCount++;
-            }
+                await OpenConnectionAsync();
+                var query = new StringBuilder($"select * from {_tableName}");
+                int whereCount = 0;
 
-            if (_modelType.GetHasDeletedColumn())
+                Func<StringBuilder, bool> AppendWhere = (query) => { if (whereCount == 0) query.Append(" where "); return true; };
+
+                var primaryKey = _modelType.GetKeyName();
+
+                if (primaryKey != null)
+                {
+                    AppendWhere(query);
+                    query.Append($"{primaryKey} = @Id");
+                    whereCount++;
+                }
+
+                if (_modelType.GetHasDeletedColumn())
+                {
+                    AppendWhere(query);
+                    query.Append(" AND IsDeleted = FALSE");
+                    whereCount++;
+                }
+
+                var entities = await _dbConnection.QueryFirstOrDefaultAsync<TEntity>(query.ToString(), new { Id = id }, commandType: CommandType.Text);
+
+                return entities;
+            }
+            finally
             {
-                AppendWhere(query);
-                query.Append(" AND IsDeleted = FALSE");
-                whereCount++;
+                Dispose();
             }
-
-            var entities = await _dbConnection.QueryFirstOrDefaultAsync<TEntity>(query.ToString(), new { Id = id }, commandType: CommandType.Text);
-
-            return entities;
+           
         }
 
         /// <summary>
@@ -177,6 +198,10 @@ namespace FresherMisa2026.Infrastructure.Repositories
                 {
                     transaction.Rollback();
                     throw;
+                }
+                finally
+                {
+                    Dispose();
                 }
             }
 
@@ -212,6 +237,11 @@ namespace FresherMisa2026.Infrastructure.Repositories
                 {
                     transaction.Rollback();
                     throw;
+                }
+                finally
+                {
+                    // Add Dispose 
+                    Dispose();
                 }
             }
 
@@ -253,6 +283,7 @@ namespace FresherMisa2026.Infrastructure.Repositories
                     throw;
                 }
             }
+            Dispose();
             //4. Trả về dữ liệu
             return rowAffects;
         }
@@ -275,26 +306,34 @@ namespace FresherMisa2026.Infrastructure.Repositories
             List<string> searchFields,
             string sort)
         {
-            long total = 0;
-            var data = Enumerable.Empty<TEntity>();
+            try
+            {
+                long total = 0;
+                var data = Enumerable.Empty<TEntity>();
 
-            await OpenConnectionAsync();
+                await OpenConnectionAsync();
 
-            string store = string.Format("Proc_{0}_FilterPaging", _tableName);
-            var parameters = new DynamicParameters();
-            parameters.Add("@v_pageIndex", pageIndex);
-            parameters.Add("@v_pageSize", pageSize);
-            parameters.Add("@v_search", search);
-            parameters.Add("@v_sort", sort);
-            parameters.Add("@v_searchFields", JsonSerializer.Serialize(searchFields));
+                string store = string.Format("Proc_{0}_FilterPaging", _tableName);
+                var parameters = new DynamicParameters();
+                parameters.Add("@v_pageIndex", pageIndex);
+                parameters.Add("@v_pageSize", pageSize);
+                parameters.Add("@v_search", search);
+                parameters.Add("@v_sort", sort);
+                parameters.Add("@v_searchFields", JsonSerializer.Serialize(searchFields));
 
-            using var reader = await _dbConnection.QueryMultipleAsync(
-                new CommandDefinition(store, parameters, commandType: CommandType.StoredProcedure));
+                using var reader = await _dbConnection.QueryMultipleAsync(
+                    new CommandDefinition(store, parameters, commandType: CommandType.StoredProcedure));
 
-            data = (await reader.ReadAsync<TEntity>()).ToList();
-            total = await reader.ReadFirstAsync<long>();
+                data = (await reader.ReadAsync<TEntity>()).ToList();
+                total = await reader.ReadFirstAsync<long>();
 
-            return (total, data);
+                return (total, data);
+            }
+            finally
+            {
+                Dispose();
+            }
+            
         }
 
         /// <summary>
