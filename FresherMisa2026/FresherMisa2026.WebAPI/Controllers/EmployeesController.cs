@@ -49,8 +49,10 @@ namespace FresherMisa2026.WebAPI.Controllers
         }
 
         [HttpGet("filter")]
-        public async Task<ActionResult<ServiceResponse>> GetBySomeCondition([FromQuery] EmployeeFilterRequest filterRequest)
+        public async Task<ActionResult<ServiceResponse>> GetBySomeCondition([FromQuery] EmployeeFilterRequest filterRequest, SimplePagingRequest pagingRequest)
         {
+            int PageSize = pagingRequest.PageSize;
+            int PageNum = pagingRequest.PageNum;
             var response = new ServiceResponse();
             // Handle edge case
             if (filterRequest == null || filterRequest.GetType().GetProperties().All(p => p.GetValue(filterRequest) == null))
@@ -60,9 +62,35 @@ namespace FresherMisa2026.WebAPI.Controllers
                 return NotFound(response);
             }
             response.IsSuccess = true;
-            response.Data = await _employeeService.GetBySomeCondition(filterRequest); ;   
-            return Ok(response);
-        }
+            var data = (await _employeeService.GetBySomeCondition(filterRequest)).ToList();
+            if (pagingRequest.PageNum < 1 || pagingRequest.PageSize < 0)
+            {
+                response.IsSuccess = false;
+                response.UserMessage = "Tham số không hợp lệ";
+                return NotFound(response);
+            }
+            else if ((PageNum - 1) * PageSize > data.Count())
+            {
+                response.IsSuccess = false;
+                response.UserMessage = "Tham số quá lớn";
+                return NotFound(response);
+            }
+            else
+            {
+                //response.IsSuccess = true;
+                //response.Data = data[((PageNum - 1) * PageSize)..(PageNum * PageSize)];
+                //return Ok(response);
+                var response1 = new PagingResponse<Employee>
+                {
+                    Total = PageSize,
+                    Data = data.GetRange((PageNum - 1) * PageSize, PageSize)
+                };
+                response.IsSuccess = true;
+                response.Code = (int)ResponseCode.Success;
+                response.Data = response1;
+                return response;
+            }
 
+        }
     }
 }
