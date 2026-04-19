@@ -85,9 +85,10 @@ namespace FresherMisa2026.WebAPI.Controllers
         /// <summary>
         /// Thêm một thực thể mới
         /// </summary>
-        [HttpPost]
+        [HttpPost("AddEmployee")]
         public async Task<ActionResult<ServiceResponse>> Post([FromBody] TEntity entity)
         {
+            Console.WriteLine("Add new Employee");
             try
             {
                 var response = await _baseService.InsertAsync(entity);

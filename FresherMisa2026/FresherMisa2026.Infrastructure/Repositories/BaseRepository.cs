@@ -35,14 +35,16 @@ namespace FresherMisa2026.Infrastructure.Repositories
         public BaseRepository(IConfiguration configuration, IMemoryCache cache)
         {
             _configuration = configuration;
+            _cache = cache;
             _connectionString = _configuration.GetConnectionString("DefaultConnection")!;
             // Tạo connection mỗi khi khởi tạo 
             // Một request có thể giữ connnection quá lâu, chiếm dụng tài nguyên 
             // Tạo pattern Create - Use - Dispose 
-            // _dbConnection = new MySqlConnector.MySqlConnection(_connectionString);
+            // Chưa lấy tài nguyên trong connection pool 
+            _dbConnection = new MySqlConnector.MySqlConnection(_connectionString);
             _modelType = typeof(TEntity);
             _tableName = _modelType.GetTableName();
-            this._cache = cache;
+            //this._cache = cache;
         }
 
 
@@ -247,7 +249,7 @@ namespace FresherMisa2026.Infrastructure.Repositories
         /// <param name="entity">Thông tin bản ghi</param>
         /// <returns>Số bản ghi thêm mới</returns>
         /// CREATED BY: DVHAI (11/07/2021)
-        public async Task<int> InsertAsync(TEntity entity)
+        public virtual async Task<int> InsertAsync(TEntity entity)
         {
             var rowAffects = 0;
             await OpenConnectionAsync();

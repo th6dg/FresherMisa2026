@@ -4,6 +4,7 @@ using FresherMisa2026.Application.Interfaces.Repositories;
 using FresherMisa2026.Entities.Employee;
 using FresherMisa2026.Entities.Employee.DTO;
 using FresherMisa2026.Infrastructure.Repositories.Config;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Text;
@@ -12,7 +13,7 @@ namespace FresherMisa2026.Infrastructure.Repositories
 {
     public class EmployeeRepository : BaseRepository<Employee>, IEmployeeRepository
     {
-        public EmployeeRepository(IConfiguration configuration) : base(configuration)
+        public EmployeeRepository(IConfiguration configuration, IMemoryCache cache) : base(configuration,cache)
         {
         }
 
@@ -104,8 +105,8 @@ namespace FresherMisa2026.Infrastructure.Repositories
             SqlBuilder.Append(JoinClause).Append(WhereClase).Append(";");
             string sql = SqlBuilder.ToString();
             return await _dbConnection.QueryAsync<Employee>(SqlBuilder.ToString(), param);
-           
-
         }
+
+        
     }
 }

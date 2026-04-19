@@ -122,7 +122,7 @@ namespace FresherMisa2026.Application.Services
         /// <param name="entity">Thực thể</param>
         /// <returns>Danh sách lỗi validate</returns>
         /// CREATED BY: DVHAI (07/07/2021)
-        private List<ValidationError> Validate(TEntity entity)
+        protected List<ValidationError> Validate(TEntity entity)
         {
             var errors = new List<ValidationError>();
             var properties = GetCachedProperties(entity.GetType());
@@ -192,7 +192,7 @@ namespace FresherMisa2026.Application.Services
         /// <param name="entity">Thực thể cần thêm</param>
         /// <returns>ServiceResponse chứa kết quả</returns>
         /// CREATED BY: DVHAI (11/07/2021)
-        public async Task<ServiceResponse> InsertAsync(TEntity entity)
+        public virtual async Task<ServiceResponse> InsertAsync(TEntity entity)
         {
             entity.State = ModelSate.Add;
 

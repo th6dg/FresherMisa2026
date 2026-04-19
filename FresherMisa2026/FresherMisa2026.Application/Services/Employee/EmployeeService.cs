@@ -4,6 +4,7 @@ using FresherMisa2026.Application.Interfaces.Services;
 using FresherMisa2026.Entities;
 using FresherMisa2026.Entities.Employee;
 using FresherMisa2026.Entities.Employee.DTO;
+using FresherMisa2026.Entities.Enums;
 using System;
 using System.Collections.Generic;
 
@@ -49,10 +50,10 @@ namespace FresherMisa2026.Application.Services
                 errors.Add(new ValidationError("EmployeeCode", "Mã nhân viên không được vượt quá 20 ký tự"));
             }
 
-            //if (string.IsNullOrEmpty(employee.EmployeeName))
-            //{
-            //    errors.Add(new ValidationError("EmployeeName", "Tên nhân viên không được để trống"));
-            //}
+            if (string.IsNullOrEmpty(employee.EmployeeName))
+            {
+                errors.Add(new ValidationError("EmployeeName", "Tên nhân viên không được để trống"));
+            }
 
             // Mã nhân viên không được trùng lặp
             var existEmployee = _employeeRepository.GetEmployeeByCode(employee.EmployeeCode).GetAwaiter().GetResult();
@@ -191,6 +192,45 @@ namespace FresherMisa2026.Application.Services
                 throw new ValidateException(errors);
             }
             return validField;
+        }
+
+        /// <summary>
+        /// Ghi đè insert method, xử lý Race Condition 
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public override async Task<ServiceResponse> InsertAsync(Employee entity)
+        {
+            // Check required, custom validate
+            var errors = Validate(entity);
+            if (errors.Count > 0)
+            {
+                return CreateErrorResponse(
+                ResponseCode.BadRequest,
+                "Validate thất bại",
+                string.Join("; ", errors.Select(static e => e.Message)));
+            }
+
+            else
+            {
+                try
+                {
+                    //Thread.Sleep(3000);
+                    int rowEffect = await _employeeRepository.InsertAsync(entity);
+                    var response = new ServiceResponse();
+                    response.IsSuccess = true;
+                    response.Data = 1;
+                    return response;
+                }
+                catch
+                {
+                    var response = new ServiceResponse();
+                    response.IsSuccess = false;
+                    response.DevMessage = "Insert failed, có thể do Employee Code không hợp lệ";
+                    return response;
+                }
+                finally { }
+            }
         }
     }
 }
