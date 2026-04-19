@@ -136,7 +136,7 @@ namespace FresherMisa2026.Infrastructure.Repositories
         /// CREATED BY: DVHAI (07/07/2021)
         public async Task<TEntity> GetEntityByIDAsync(Guid entityId)
         {
-            string key = $"GetAll{typeof(TEntity)}ID";
+            string key = $"Get{typeof(TEntity)}By{entityId}";
             // Check cache
             if (!_cache.TryGetValue(key, out TEntity entity))
             {
@@ -199,6 +199,7 @@ namespace FresherMisa2026.Infrastructure.Repositories
         /// CREATED BY: DVHAI (11/07/2021)
         public async Task<int> DeleteAsync(Guid entityId)
         {
+            // Update: Delete By ID, clear cache
             var rowAffects = 0;
             await OpenConnectionAsync();
 
@@ -216,6 +217,13 @@ namespace FresherMisa2026.Infrastructure.Repositories
                     rowAffects = await _dbConnection.ExecuteAsync($"Proc_Delete{_tableName}ById", param: dynamicParams, transaction: transaction, commandType: CommandType.StoredProcedure);
 
                     transaction.Commit();
+
+                    // Remove cache when delete successfully
+                    string key = $"Get{typeof(TEntity)}By{entityId}";
+                    if (_cache.TryGetValue(key, out TEntity entity))
+                    {
+                        _cache.Remove(key);
+                    }
                 }
                 catch
                 {
@@ -299,6 +307,13 @@ namespace FresherMisa2026.Infrastructure.Repositories
                     rowAffects = await _dbConnection.ExecuteAsync($"Proc_Update{_tableName}", param: parameters, transaction: transaction, commandType: CommandType.StoredProcedure);
 
                     transaction.Commit();
+
+                    // Remove cache when update successfully
+                    string key = $"Get{typeof(TEntity)}By{entityId}";
+                    if (_cache.TryGetValue(key, out TEntity e))
+                    {
+                        _cache.Remove(key);
+                    }
                 }
                 catch
                 {
