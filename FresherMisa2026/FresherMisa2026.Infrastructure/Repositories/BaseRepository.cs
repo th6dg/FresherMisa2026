@@ -3,6 +3,7 @@ using FresherMisa2026.Application.Interfaces;
 using FresherMisa2026.Entities;
 using FresherMisa2026.Entities.Department;
 using FresherMisa2026.Entities.Extensions;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using MySqlConnector;
 using System;
@@ -27,10 +28,11 @@ namespace FresherMisa2026.Infrastructure.Repositories
         protected IDbConnection _dbConnection = null;
         protected string _tableName;
         public Type _modelType = null;
+        protected readonly IMemoryCache _cache;
 
 
         //Constructor
-        public BaseRepository(IConfiguration configuration)
+        public BaseRepository(IConfiguration configuration, IMemoryCache cache)
         {
             _configuration = configuration;
             _connectionString = _configuration.GetConnectionString("DefaultConnection")!;
@@ -40,6 +42,7 @@ namespace FresherMisa2026.Infrastructure.Repositories
             // _dbConnection = new MySqlConnector.MySqlConnection(_connectionString);
             _modelType = typeof(TEntity);
             _tableName = _modelType.GetTableName();
+            this._cache = cache;
         }
 
 
@@ -82,7 +85,17 @@ namespace FresherMisa2026.Infrastructure.Repositories
         /// Created By: dvhai (09/04/2026)
         public async Task<IEnumerable<BaseModel>> GetEntitiesAsync()
         {
-            return await GetEntitiesUsingCommandTextAsync();
+            string key = $"GetAll{typeof(TEntity)}";
+            // Check cache
+            if (!_cache.TryGetValue(key, out IEnumerable<BaseModel> entities))
+            {
+                // If not, query DB
+                entities = (await GetEntitiesUsingCommandTextAsync()).ToList();
+                // Update cache
+                var cacheOption = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(5));
+                _cache.Set(key, entities, cacheOption);
+            }
+            return entities;
         }
 
         /// <summary>
@@ -123,7 +136,17 @@ namespace FresherMisa2026.Infrastructure.Repositories
         /// CREATED BY: DVHAI (07/07/2021)
         public async Task<TEntity> GetEntityByIDAsync(Guid entityId)
         {
-            return await GetEntitieByIdUsingCommandTextAsync(entityId.ToString());
+            string key = $"GetAll{typeof(TEntity)}ID";
+            // Check cache
+            if (!_cache.TryGetValue(key, out TEntity entity))
+            {
+                // If not, query DB
+                entity = await GetEntitieByIdUsingCommandTextAsync(entityId.ToString());
+                // Update cache
+                var cacheOption = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(5));
+                _cache.Set(key, entity, cacheOption);
+            }
+            return entity;
         }
 
         /// <summary>
@@ -306,6 +329,7 @@ namespace FresherMisa2026.Infrastructure.Repositories
             List<string> searchFields,
             string sort)
         {
+            // Data thay đổi liên tục, không nên cache 
             try
             {
                 long total = 0;
