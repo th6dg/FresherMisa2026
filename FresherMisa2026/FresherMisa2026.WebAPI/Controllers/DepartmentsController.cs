@@ -28,10 +28,19 @@ namespace FresherMisa2026.WebAPI.Controllers
         public async Task<ActionResult<ServiceResponse>> GetByCode(string code)
         {
             var response = new ServiceResponse();
-            response.Data = await _departmentSerice.GetDepartmentByCodeAsync(code);
-            response.IsSuccess = true;
+            try
+            {  
+                response.Data = await _departmentSerice.GetDepartmentByCodeAsync(code);
+                response.IsSuccess = true;
 
-            return response;
+                return response;
+            }
+            catch
+            {
+                response.IsSuccess = false;
+                response.Data = null;
+                return response;
+            }
         }
 
         #region feat-2.3

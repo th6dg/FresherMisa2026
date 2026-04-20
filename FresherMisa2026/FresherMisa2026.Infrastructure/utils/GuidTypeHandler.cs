@@ -6,24 +6,28 @@ using System.Text;
 
 namespace FresherMisa2026.Infrastructure.utils
 {
-    public class GuidTypeHandler : SqlMapper.TypeHandler<Guid>
+    public class GuidTypeHandler : SqlMapper.ITypeHandler
     {
-        public override void SetValue(IDbDataParameter parameter, Guid value)
+        public void SetValue(IDbDataParameter parameter, object value)
         {
-            parameter.Value = value.ToString();
+            parameter.Value = value;
         }
 
-        public override Guid Parse(object value)
+        public object Parse(Type destinationType, object value)
         {
-            if (value == null || value == DBNull.Value)
-                return Guid.Empty;
-            string guidString = value.ToString().Trim();
-            if (Guid.TryParse(guidString, out Guid result))
+            if (value is null)
             {
-                return result;
+                return null;
             }
 
-            return Guid.Empty;
-        }
+            if  (value is Guid guid)
+            {
+                return guid;
+            }
+            if (value is string str)
+            {
+                return new Guid(str);
+            }
+            return Guid.Parse(value?.ToString() ?? Guid.Empty.ToString());        }
     }
 }

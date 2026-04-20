@@ -21,10 +21,20 @@ namespace FresherMisa2026.WebAPI.Controllers
         [HttpGet("Code/{code}")]
         public async Task<ActionResult<ServiceResponse>> GetByCode(string code)
         {
+           
             var response = new ServiceResponse();
-            response.Data = await _employeeService.GetEmployeeByCodeAsync(code);
-            response.IsSuccess = true;
-
+            try
+            {
+                response.Code = 200;
+                response.Data = await _employeeService.GetEmployeeByCodeAsync(code);
+                response.IsSuccess = true;
+            }
+            catch
+            {
+                response.Code = 404;
+                response.IsSuccess = false;
+                response.DevMessage = "Not found Employee";
+            }
             return response;
         }
 

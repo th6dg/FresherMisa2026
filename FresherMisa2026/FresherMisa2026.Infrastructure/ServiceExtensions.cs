@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Extensions.Caching.Memory;
+using Dapper;
 
 namespace FresherMisa2026.Infrastructure
 {
@@ -16,7 +17,10 @@ namespace FresherMisa2026.Infrastructure
         public static IServiceCollection AddInfrastructure(
             this IServiceCollection services)
         {
-            Dapper.SqlMapper.AddTypeHandler(new GuidTypeHandler());
+            SqlMapper.AddTypeHandler(typeof(Guid), new GuidTypeHandler());
+            SqlMapper.AddTypeHandler(typeof(Guid?), new GuidTypeHandler());
+            SqlMapper.RemoveTypeMap(typeof(Guid));
+            SqlMapper.RemoveTypeMap(typeof(Guid?));
             //base
             services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             services.AddMemoryCache();

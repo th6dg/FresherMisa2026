@@ -20,10 +20,19 @@ namespace FresherMisa2026.WebAPI.Controllers
         public async Task<ActionResult<ServiceResponse>> GetByCode(string code)
         {
             var response = new ServiceResponse();
-            response.Data = await _positionService.GetPositionByCodeAsync(code);
-            response.IsSuccess = true;
+            try
+            {
+                response.Data = await _positionService.GetPositionByCodeAsync(code);
+                response.IsSuccess = true;
 
+            }
+            catch
+            {
+                response.IsSuccess = false;
+                response.DevMessage = "Không tìm thấy position";
+            }
             return response;
+            
         }
     }
 }
