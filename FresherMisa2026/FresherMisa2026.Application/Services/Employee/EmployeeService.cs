@@ -1,3 +1,4 @@
+using FresherMisa2026.Application.CustomException;
 using FresherMisa2026.Application.Interfaces;
 using FresherMisa2026.Application.Interfaces.Repositories;
 using FresherMisa2026.Application.Interfaces.Services;
@@ -7,6 +8,7 @@ using FresherMisa2026.Entities.Employee.DTO;
 using FresherMisa2026.Entities.Enums;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 
 namespace FresherMisa2026.Application.Services
 {
@@ -41,6 +43,11 @@ namespace FresherMisa2026.Application.Services
             return await _employeeRepository.GetEmployeesByPositionId(positionId);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="employee"></param>
+        /// <returns></returns>
         protected override List<ValidationError> ValidateCustom(Employee employee)
         {
             var errors = new List<ValidationError>();
@@ -224,10 +231,7 @@ namespace FresherMisa2026.Application.Services
                 }
                 catch
                 {
-                    var response = new ServiceResponse();
-                    response.IsSuccess = false;
-                    response.DevMessage = "Insert failed, có thể do Employee Code không hợp lệ";
-                    return response;
+                    throw new CanNotAddEmployeeException(entity.EmployeeCode);
                 }
                 finally { }
             }

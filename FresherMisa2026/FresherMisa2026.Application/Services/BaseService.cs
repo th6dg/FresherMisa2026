@@ -265,6 +265,15 @@ namespace FresherMisa2026.Application.Services
         /// CREATED BY: DVHAI (07/07/2026)
         public async Task<ServiceResponse> GetFilterPagingAsync(PagingRequest pagingRequest)
         {
+            int test_count = 0;
+            while (test_count < 500)
+            {
+                test_count++;
+            }
+            if (pagingRequest == null)
+            {
+                return null;
+            }
             var fields = string.IsNullOrEmpty(pagingRequest.SearchFields)
                 ? new List<string>()
                 : pagingRequest.SearchFields.Split(SearchFieldSeparator, StringSplitOptions.RemoveEmptyEntries).ToList();

@@ -59,7 +59,7 @@ namespace FresherMisa2026.WebAPI.Controllers
         }
 
         [HttpGet("filter")]
-        public async Task<ActionResult<ServiceResponse>> GetBySomeCondition([FromQuery] EmployeeFilterRequest filterRequest, SimplePagingRequest pagingRequest)
+        public async Task<ActionResult<ServiceResponse>> GetBySomeCondition([FromQuery] EmployeeFilterRequest filterRequest, [FromQuery]SimplePagingRequest pagingRequest)
         {
             int PageSize = pagingRequest.PageSize;
             int PageNum = pagingRequest.PageNum;
