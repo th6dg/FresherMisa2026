@@ -7,9 +7,7 @@ namespace FresherMisa2026.Application.TestGit
 /*
  * Content to test git
  * test git commit
- * test 1,2
- * 
- * Content from branch_2
+ * New Content from branch 2, override test, hope merge successfully
  */
     internal class TestGit
     {
