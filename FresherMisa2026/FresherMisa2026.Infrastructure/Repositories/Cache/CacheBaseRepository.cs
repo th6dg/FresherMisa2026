@@ -4,6 +4,7 @@ using FresherMisa2026.Infrastructure.Repositories.Config;
 using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Text;
 
 namespace FresherMisa2026.Infrastructure.Repositories.Cache
@@ -20,6 +21,12 @@ namespace FresherMisa2026.Infrastructure.Repositories.Cache
         {
             this._innerRepository = innerRepository;
             this._cache = cache;
+        }
+
+        public IDbTransaction CreateTransaction()
+        {
+            Console.WriteLine("CREATE TRANSACTION");
+            throw new NotImplementedException();
         }
 
         /// <summary>

@@ -1,21 +1,26 @@
 using FresherMisa2026.Application.Interfaces.Services;
+using FresherMisa2026.Application.Interfaces.Services.Write;
 using FresherMisa2026.Entities;
 using FresherMisa2026.Entities.Employee;
 using FresherMisa2026.Entities.Enums;
+using FresherMisa2026.Entities.RequestDTO;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections;
 
 namespace FresherMisa2026.WebAPI.Controllers
 {
     [ApiController]
-    public class EmployeesController : BaseController<Employee>
+    public partial class EmployeesController : BaseController<Employee>
     {
         private readonly IEmployeeService _employeeService;
+        private readonly IEmployeeWriteService _employeeWriteService;
 
         public EmployeesController(
-            IEmployeeService employeeService) : base(employeeService)
+            IEmployeeService employeeService,
+            IEmployeeWriteService employeeWriteService) : base(employeeService)
         {
             _employeeService = employeeService;
+            _employeeWriteService = employeeWriteService;
         }
 
         [HttpGet("Code/{code}")]
@@ -42,9 +47,9 @@ namespace FresherMisa2026.WebAPI.Controllers
         public async Task<ActionResult<ServiceResponse>> GetByDepartmentId(Guid departmentId)
         {
             var response = new ServiceResponse();
-            response.Data = await _employeeService.GetEmployeesByDepartmentIdAsync(departmentId);
+            IEnumerable<Employee> result = await _employeeService.GetEmployeesByDepartmentIdAsync(departmentId);
+            response.Data = result;
             response.IsSuccess = true;
-
             return response;
         }
 
@@ -92,8 +97,10 @@ namespace FresherMisa2026.WebAPI.Controllers
                 //return Ok(response);
                 var response1 = new PagingResponse<Employee>
                 {
-                    Total = PageSize,
-                    Data = data.GetRange((PageNum - 1) * PageSize, PageSize)
+                    Total = Math.Min(data.Count, PageSize),
+                    Data = data.Skip((PageNum - 1) * PageSize)
+                               .Take(PageSize)
+                               .ToList()
                 };
                 response.IsSuccess = true;
                 response.Code = (int)ResponseCode.Success;
@@ -101,6 +108,13 @@ namespace FresherMisa2026.WebAPI.Controllers
                 return response;
             }
 
+        }
+
+        [HttpPost("get-data-dynamically")]
+        public async Task<IEnumerable<dynamic>> GetDataDynamicAsyncs([FromBody] Employee0RequestDTO listParam)
+        {
+            return await _employeeService.GetDynamicsEmployee(listParam);
+           
         }
     }
 }

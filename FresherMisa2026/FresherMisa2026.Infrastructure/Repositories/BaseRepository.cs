@@ -25,7 +25,7 @@ namespace FresherMisa2026.Infrastructure.Repositories
         //Properties
         string _connectionString = string.Empty;
         IConfiguration _configuration;
-        protected IDbConnection _dbConnection = null;
+        protected IDbConnection _dbConnection { get; set; }
         protected string _tableName;
         public Type _modelType = null;
         protected readonly IMemoryCache _cache;
@@ -47,6 +47,14 @@ namespace FresherMisa2026.Infrastructure.Repositories
             //this._cache = cache;
         }
 
+        public IDbTransaction CreateTransaction()
+        {
+            if (_dbConnection.State != ConnectionState.Open)
+            {
+                _dbConnection.Open();
+            }
+            return _dbConnection.BeginTransaction();
+        }
 
         /// <summary>
         /// Dispose connection
@@ -64,7 +72,7 @@ namespace FresherMisa2026.Infrastructure.Repositories
         /// <summary>
         /// Mở kết nối database
         /// </summary>
-        private async Task OpenConnectionAsync()
+        protected async Task OpenConnectionAsync()
         {
             if (_dbConnection.State != ConnectionState.Open)
             {

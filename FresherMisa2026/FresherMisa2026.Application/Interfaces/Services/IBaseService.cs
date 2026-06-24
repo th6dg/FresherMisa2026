@@ -1,11 +1,18 @@
 using FresherMisa2026.Entities;
 using System;
 using System.Collections.Generic;
+using System.Data;
 
 namespace FresherMisa2026.Application.Interfaces.Services
 {
     public interface IBaseService<TEntity>
     {
+        /// <summary>
+        /// Create new transaction
+        /// </summary>
+        /// <returns></returns>
+        IDbTransaction CreateTransaction();
+
         /// <summary>
         /// Lấy tất cả bản ghi
         /// </summary>

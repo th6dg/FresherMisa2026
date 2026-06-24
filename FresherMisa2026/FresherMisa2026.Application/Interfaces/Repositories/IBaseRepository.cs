@@ -1,12 +1,15 @@
 using FresherMisa2026.Entities;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Text;
 
 namespace FresherMisa2026.Application.Interfaces
 {
     public interface IBaseRepository<TEntity>
     {
+        IDbTransaction CreateTransaction();
+
         /// <summary>
         /// Lấy danh sách thực thể paging
         /// </summary>

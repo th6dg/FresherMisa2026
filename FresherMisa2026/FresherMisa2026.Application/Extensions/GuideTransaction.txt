@@ -1,0 +1,36 @@
++	CASE 1: Báo cáo quỹ lương ảo (Thử thách Dirty Read)
+	Kịch bản:Bạn cần chạy một báo cáo tổng quỹ lương của một phòng ban.
+Tiến trình A (Thăng chức): Bắt đầu Transaction. Thực hiện UPDATE PositionId và tăng Salary cho nhân viên Nguyễn Văn A (chưa Commit).
+Tiến trình B (Báo cáo): Bắt đầu Transaction. Lấy SUM(Salary) của tất cả nhân viên trong Department của A. 
+	=> Kết quả trả về đã bao gồm cả mức lương mới của A.
+	Tiến trình A (Lỗi hệ thống): Transaction bị Rollback. 
+	Lương của A quay về như cũ, nhưng Tiến trình B đã xuất xong báo cáo quỹ lương với con số cao hơn thực tế.
+	
+
++	CASE 2: Vỡ định biên nhân sự (Thử thách Non-Repeatable Read / Lost Update / Write Skew)
+	Kịch bản:Vị trí "Giám đốc kỹ thuật" (PositionId = 5) chỉ cho phép tối đa 1 người đảm nhận (MaxSlots = 1).
+Tiến trình A (HR 1): Bắt đầu Transaction. Kiểm tra số người đang giữ Position 5 bằng lệnh. Kết quả là 0. 
+Lập tức đi pha ly cafe (delay 3 giây) trước khi gán nhân viên X vào vị trí này.
+Tiến trình B (HR 2): Cũng kiểm tra Position 5, thấy kết quả là 0. 
+Lập tức UPDATE PositionId = 5 cho nhân viên Y và Commit ngay.
+Tiến trình A (HR 1 tiếp tục): Uống cafe xong, thực hiện UPDATE PositionId = 5 cho nhân viên X và Commit.
+	=> Kết quả: Hệ thống có 2 người giữ vị trí Giám đốc kỹ thuật, vi phạm logic MaxSlots.
+
+
++	CASE 3: Danh sách bị chênh (Thử thách Phantom Read)
+	So sánh PHANTOM READ (read range row / add new row) và NON-REPEATABLE READ (read specific row / change to new value)
+	Kịch bản:Xuất danh sách nhân sự của một phòng ban để gửi email thông báo quan trọng.
+Tiến trình A (Xuất file): Bắt đầu Transaction. SELECT danh sách Employee thuộc DepartmentId = 2 . Trả về 15 người. 
+Tiến trình này tạm dừng 2 giây để generate file PDF.
+Tiến trình B (Tuyển dụng): INSERT một nhân viên hoàn toàn mới vào DepartmentId = 2 và Commit.
+Tiến trình A (Gửi mail): Chạy lại câu SELECT y hệt để lấy danh sách email. Trả về 16 người. 
+	=> Kết quả: File PDF đính kèm chỉ có 15 người, nhưng email lại được gửi cho 16 người.
+
+
++	CASE 4: Luân chuyển chéo (Thử thách Deadlock)
+	Kịch bản:Nghiệp vụ đổi chéo vị trí công tác giữa 2 nhân viên (Nhân viên A sang vị trí của B, và B sang vị trí của A).
+Tiến trình 1 (Thực thi yêu cầu 1): Bắt đầu Transaction. 
+UPDATE vị trí mới cho Nhân viên A (giữ Lock của A) -> (Chờ 1 giây) -> Cố gắng UPDATE vị trí mới cho Nhân viên B.
+Tiến trình 2 (Thực thi yêu cầu 2, do gọi nhầm API song song): Bắt đầu Transaction. 
+UPDATE vị trí mới cho Nhân viên B (giữ Lock của B) -> (Chờ 1 giây) -> Cố gắng UPDATE vị trí mới cho Nhân viên A.
+	=> Kết quả: Hai tiến trình khóa chéo nhau vô tận cho đến khi DB engine báo lỗi Deadlock.

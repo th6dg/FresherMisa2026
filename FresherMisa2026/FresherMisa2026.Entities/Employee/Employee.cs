@@ -9,7 +9,7 @@ namespace FresherMisa2026.Entities.Employee
     public class Employee : BaseModel
     {
         [Key]
-        public Guid? EmployeeID { get; set; }
+        public Guid EmployeeID { get; set; }
 
         [IRequired]
         public string EmployeeCode { get; set; }
@@ -17,26 +17,26 @@ namespace FresherMisa2026.Entities.Employee
         [IRequired]
         public string EmployeeName { get; set; }
 
-        public int? Gender { get; set; }
-
-        public DateTime? DateOfBirth { get; set; }
-
-        public string? PhoneNumber { get; set; }
-
-        public string? Email { get; set; }
-
-        public string? Address { get; set; }
-
         [IRequired]
         public Guid? DepartmentID { get; set; }
 
         [IRequired]
         public Guid? PositionID { get; set; }
 
-        public decimal? Salary { get; set; }
+        public int? Status { get; set; } // 1: Đang sử dụng, 0: Ngừng sử dụng
 
-        public DateTime? CreatedDate { get; set; }
-
+        public override string ToString()
+        {
+            return $"""
+                Value of Employee
+                Id: {this.EmployeeID}, 
+                Code: {this.EmployeeCode}, 
+                Name: {this.EmployeeName}, 
+                PositionId: {this.PositionID}, 
+                DepartmentId: {this.DepartmentID}, 
+                CreatedDate: {this.CreatedDate} 
+                """;
+        }
         public static bool IsValidEmail(string email)
         {
             if (string.IsNullOrWhiteSpace(email))

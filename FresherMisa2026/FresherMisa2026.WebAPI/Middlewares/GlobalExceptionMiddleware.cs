@@ -1,4 +1,5 @@
 ﻿using FresherMisa2026.Application;
+using FresherMisa2026.Application.CustomException;
 using FresherMisa2026.Entities;
 using System.Net;
 using System.Text.Json;
@@ -42,6 +43,12 @@ namespace FresherMisa2026.WebAPI.Middlewares
                 statusCode = (int)HttpStatusCode.BadRequest;
                 userMessage = "Dữ liệu không hợp lệ!";
                 data = validateEx.Errors; // Danh sách cộng dồn lỗi của bạn đây
+            }
+
+            if (exception is TestException )
+            {
+                statusCode = (int)HttpStatusCode.BadRequest;
+                userMessage = "Dữ liệu không hợp lệ!";
             }
 
             context.Response.StatusCode = statusCode;

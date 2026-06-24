@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace FresherMisa2026.Entities
@@ -18,13 +19,15 @@ namespace FresherMisa2026.Entities
         /// <summary>
         /// Người tạo
         /// </summary>
+        [NotMapped]
         public string? CreatedBy { get; set; }
 
         /// <summary>
         /// Ngày tạo
         /// </summary>
-        public DateTime? CreateDate { get; set; }
-        
+        [NotMapped]
+        public DateTime? CreatedDate { get; set; }
+
         /// <summary>
         /// Người sửa
         /// </summary>
@@ -38,11 +41,13 @@ namespace FresherMisa2026.Entities
         /// <summary>
         /// Trạng thái thêm sửa xóa, không lưu database
         /// </summary>
+        [NotMapped]
         public ModelSate State { get; set; }
 
         /// <summary>
         /// Có xóa mềm hay không
         /// </summary>
+        [NotMapped]
         public bool IsDeleted { get; set; }
     }
 }

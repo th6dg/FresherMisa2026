@@ -4,6 +4,7 @@ using FresherMisa2026.Entities;
 using FresherMisa2026.Entities.Enums;
 using FresherMisa2026.Entities.Extensions;
 using System.Collections.Concurrent;
+using System.Data;
 using System.Reflection;
 
 namespace FresherMisa2026.Application.Services
@@ -58,6 +59,13 @@ namespace FresherMisa2026.Application.Services
         /// </summary>
         /// <returns>Danh sách bản ghi</returns>
         /// CREATED BY: DVHAI 11/07/2026
+        
+        public IDbTransaction CreateTransaction()
+        {
+            
+            return _baseRepository.CreateTransaction();
+        }
+
         public async Task<ServiceResponse> GetEntitiesAsync()
         {
             var entities = await _baseRepository.GetEntitiesAsync();

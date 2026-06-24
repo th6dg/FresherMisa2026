@@ -2,6 +2,9 @@
   "Department.GetByCode": "SELECT * FROM Department WHERE DepartmentCode=@DepartmentCode",
   "Position.GetByCode": "SELECT * FROM Position WHERE PositionCode=@PositionCode",
   "Employee.GetByCode": "SELECT * FROM Employee WHERE EmployeeCode=@EmployeeCode",
-  "Employee.GetByDepartmentId": "SELECT * FROM Employee WHERE DepartmentID=@DepartmentID AND IsDeleted = FALSE",
-  "Employee.GetByPositionId": "SELECT * FROM Employee WHERE PositionID=@PositionID AND IsDeleted = FALSE"
+  "Employee.GetByDepartmentId": "SELECT * FROM Employee WHERE DepartmentID=@DepartmentID",
+  "Employee.GetByPositionId": "SELECT * FROM Employee WHERE PositionID=@PositionID ",
+  "Employee.UpdateSalaryByCode": "update employee set salary=@newSalary where EmployeeCode = @EmployeeCode",
+  "Employee.GetTotalNumberEmployeeInPosition": "select count(*) from employee where PositionID = @PositionId",
+  "Employee.GetByPagingV2": "select * from employee e left join employee_finance ef on e.EmployeeID = ef.EmployeeID left join department d on e.departmentID = d.departmentID left join position p on e.positionID = p.positionID limit @Limit offset @Offset"
 }
